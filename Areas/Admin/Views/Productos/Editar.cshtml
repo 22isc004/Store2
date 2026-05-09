@@ -1,0 +1,143 @@
+@model SneackersStore.Models.Producto
+@{
+    ViewData["Title"] = $"Editar: {Model.Nombre}";
+}
+
+<div class="admin-form-page">
+    <nav class="admin-breadcrumb">
+        <a asp-area="Admin" asp-controller="Productos" asp-action="Index">Productos</a>
+        <span>/</span>
+        <span>Editar</span>
+    </nav>
+
+    <div class="admin-card">
+        <form asp-action="Editar" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+            <div class="form-section-admin">
+                <h4>Información Básica</h4>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label asp-for="Nombre"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CategoriaId"></label>
+                        <select asp-for="CategoriaId" asp-items="ViewBag.Categorias" class="form-control"></select>
+                        <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label asp-for="Marca"></label>
+                        <input asp-for="Marca" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Modelo"></label>
+                        <input asp-for="Modelo" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Descripcion"></label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section-admin">
+                <h4>Precio y Stock</h4>
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label asp-for="Precio"></label>
+                        <div class="input-prefix">
+                            <span>$</span>
+                            <input asp-for="Precio" class="form-control" type="number" step="0.01" />
+                        </div>
+                        <span asp-validation-for="Precio" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PrecioOferta"></label>
+                        <div class="input-prefix">
+                            <span>$</span>
+                            <input asp-for="PrecioOferta" class="form-control" type="number" step="0.01" placeholder="Opcional" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Stock"></label>
+                        <input asp-for="Stock" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="Stock" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-admin">
+                <h4>Variantes</h4>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label asp-for="Tallas"></label>
+                        <input asp-for="Tallas" class="form-control" placeholder="38,39,40,41,42" />
+                        <small class="form-text">Separar con comas</small>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Colores"></label>
+                        <input asp-for="Colores" class="form-control" placeholder="Negro,Blanco,Rojo" />
+                        <small class="form-text">Separar con comas</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-admin">
+                <h4>Imagen</h4>
+                @if (!string.IsNullOrEmpty(Model.Imagen))
+                {
+                    <div class="imagen-actual">
+                        <img src="@Model.Imagen" alt="Imagen actual" style="max-width:200px;border-radius:8px;" />
+                        <p><small>Imagen actual</small></p>
+                    </div>
+                }
+                <div class="form-group">
+                    <label for="imagenFile">Cambiar Imagen</label>
+                    <input type="file" name="imagenFile" class="form-control" accept="image/*" />
+                    <small class="form-text">Deja vacío para mantener la imagen actual</small>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Imagen">O URL de imagen</label>
+                    <input asp-for="Imagen" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-section-admin">
+                <h4>Opciones</h4>
+                <div class="form-checks-row">
+                    <label class="form-check-label">
+                        <input asp-for="Activo" type="checkbox" /> Activo
+                    </label>
+                    <label class="form-check-label">
+                        <input asp-for="Destacado" type="checkbox" /> Destacado
+                    </label>
+                    <label class="form-check-label">
+                        <input asp-for="EsNuevo" type="checkbox" /> Nuevo
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a asp-area="Admin" asp-controller="Productos" asp-action="Index" class="btn-outline btn-lg">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

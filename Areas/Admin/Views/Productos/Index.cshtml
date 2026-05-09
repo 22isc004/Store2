@@ -1,0 +1,144 @@
+@model List<SneackersStore.Models.Producto>
+@{
+    ViewData["Title"] = "Productos";
+}
+
+<div class="admin-toolbar">
+    <div class="toolbar-search">
+        <form method="get" class="search-form">
+            <input type="text" name="busqueda" value="@ViewBag.Busqueda" placeholder="Buscar productos..." class="form-control" />
+            <select name="categoriaId" class="form-control">
+                <option value="">Todas las categorías</option>
+                @foreach (SelectListItem item in ViewBag.Categorias)
+                {
+                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                }
+            </select>
+            <button type="submit" class="btn-primary">Buscar</button>
+        </form>
+    </div>
+    <a asp-area="Admin" asp-controller="Productos" asp-action="Crear" class="btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Producto
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No hay productos registrados</td>
+                    </tr>
+                }
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@(p.Imagen ?? "/img/no-image.jpg")" alt="@p.Nombre"
+                                 style="width:50px;height:50px;object-fit:cover;border-radius:6px;" />
+                        </td>
+                        <td>
+                            <strong>@p.Nombre</strong>
+                            @if (!string.IsNullOrEmpty(p.Marca))
+                            {
+                                <br /><small class="text-muted">@p.Marca</small>
+                            }
+                        </td>
+                        <td>@p.Categoria?.Nombre</td>
+                        <td>
+                            @if (p.PrecioOferta.HasValue)
+                            {
+                                <span class="precio-oferta-sm">$@p.PrecioOferta.Value.ToString("N2")</span>
+                                <br /><small><s>$@p.Precio.ToString("N2")</s></small>
+                            }
+                            else
+                            {
+                                <span>$@p.Precio.ToString("N2")</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="@(p.Stock == 0 ? "text-danger" : p.Stock < 5 ? "text-warning" : "text-success")">
+                                @p.Stock
+                            </span>
+                        </td>
+                        <td>
+                            <button class="toggle-activo btn-sm @(p.Activo ? "btn-success" : "btn-secondary")"
+                                    data-id="@p.Id" title="Click para cambiar">
+                                @(p.Activo ? "Activo" : "Inactivo")
+                            </button>
+                        </td>
+                        <td class="actions-cell">
+                            <a asp-area="Admin" asp-controller="Productos" asp-action="Editar"
+                               asp-route-id="@p.Id" class="btn-sm btn-primary" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-area="Admin" asp-controller="Productos" asp-action="Detalles"
+                               asp-route-id="@p.Id" class="btn-sm btn-outline" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn-sm btn-danger btn-eliminar" data-id="@p.Id" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Toggle activo/inactivo via AJAX
+    document.querySelectorAll('.toggle-activo').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.dataset.id;
+            fetch(`/Admin/Productos/ToggleActivo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(id)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.textContent = data.activo ? 'Activo' : 'Inactivo';
+                    this.className = `toggle-activo btn-sm ${data.activo ? 'btn-success' : 'btn-secondary'}`;
+                }
+            });
+        });
+    });
+
+    // Eliminar producto via AJAX
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (!confirm('¿Desactivar este producto?')) return;
+            const id = this.dataset.id;
+            fetch(`/Admin/Productos/Eliminar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(id)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest('tr').style.opacity = '0.4';
+                    mostrarNotificacion(data.message, 'success');
+                }
+            });
+        });
+    });
+</script>
+}

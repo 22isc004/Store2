@@ -1,0 +1,148 @@
+@model SneackersStore.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Tarjetas de métricas -->
+<div class="metrics-grid">
+    <div class="metric-card metric-blue">
+        <div class="metric-icon"><i class="fas fa-box"></i></div>
+        <div class="metric-info">
+            <span class="metric-value">@Model.ProductosActivos</span>
+            <span class="metric-label">Productos Activos</span>
+            <small>de @Model.TotalProductos totales</small>
+        </div>
+    </div>
+    <div class="metric-card metric-green">
+        <div class="metric-icon"><i class="fas fa-shopping-cart"></i></div>
+        <div class="metric-info">
+            <span class="metric-value">@Model.TotalPedidos</span>
+            <span class="metric-label">Pedidos Totales</span>
+            <small>@Model.PedidosPendientes pendientes</small>
+        </div>
+    </div>
+    <div class="metric-card metric-orange">
+        <div class="metric-icon"><i class="fas fa-users"></i></div>
+        <div class="metric-info">
+            <span class="metric-value">@Model.TotalUsuarios</span>
+            <span class="metric-label">Usuarios</span>
+            <small>Registrados</small>
+        </div>
+    </div>
+    <div class="metric-card metric-purple">
+        <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
+        <div class="metric-info">
+            <span class="metric-value">$@Model.VentasMes.ToString("N0")</span>
+            <span class="metric-label">Ventas del Mes</span>
+            <small>Total: $@Model.VentasTotales.ToString("N0")</small>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen de ventas -->
+<div class="admin-grid-2 mt-4">
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3><i class="fas fa-chart-bar"></i> Resumen de Ventas</h3>
+        </div>
+        <div class="admin-card-body">
+            <div class="ventas-resumen">
+                <div class="venta-item">
+                    <span>Hoy</span>
+                    <strong>$@Model.VentasHoy.ToString("N2")</strong>
+                </div>
+                <div class="venta-item">
+                    <span>Esta Semana</span>
+                    <strong>$@Model.VentasSemana.ToString("N2")</strong>
+                </div>
+                <div class="venta-item">
+                    <span>Este Mes</span>
+                    <strong>$@Model.VentasMes.ToString("N2")</strong>
+                </div>
+                <div class="venta-item venta-total">
+                    <span>Total Histórico</span>
+                    <strong>$@Model.VentasTotales.ToString("N2")</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos sin stock -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Sin Stock</h3>
+        </div>
+        <div class="admin-card-body">
+            @if (!Model.ProductosSinStock.Any())
+            {
+                <p class="text-muted">Todos los productos tienen stock disponible.</p>
+            }
+            else
+            {
+                @foreach (var p in Model.ProductosSinStock)
+                {
+                    <div class="stock-item">
+                        <span>@p.Nombre</span>
+                        <a asp-area="Admin" asp-controller="Productos" asp-action="Editar"
+                           asp-route-id="@p.Id" class="btn-sm btn-warning">Editar</a>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Últimos pedidos -->
+<div class="admin-card mt-4">
+    <div class="admin-card-header">
+        <h3><i class="fas fa-shopping-cart"></i> Últimos Pedidos</h3>
+        <a asp-area="Admin" asp-controller="Pedidos" asp-action="Index" class="btn-sm btn-outline">
+            Ver todos
+        </a>
+    </div>
+    <div class="admin-card-body">
+        @if (!Model.UltimosPedidos.Any())
+        {
+            <p class="text-muted">No hay pedidos aún.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>N° Pedido</th>
+                            <th>Cliente</th>
+                            <th>Productos</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pedido in Model.UltimosPedidos)
+                        {
+                            <tr>
+                                <td><strong>#@pedido.NumeroPedido</strong></td>
+                                <td>@pedido.Usuario?.Nombre @pedido.Usuario?.Apellido</td>
+                                <td>@pedido.Items.Count</td>
+                                <td>$@pedido.Total.ToString("N2")</td>
+                                <td>
+                                    <span class="estado-badge estado-@pedido.Estado.ToString().ToLower()">
+                                        @pedido.Estado
+                                    </span>
+                                </td>
+                                <td>@pedido.FechaPedido.ToLocalTime().ToString("dd/MM/yy")</td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Pedidos" asp-action="Detalles"
+                                       asp-route-id="@pedido.Id" class="btn-sm btn-primary">Ver</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

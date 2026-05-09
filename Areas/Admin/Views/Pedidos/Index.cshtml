@@ -1,0 +1,85 @@
+@model List<SneackersStore.Models.Pedido>
+@using SneackersStore.Models
+@{
+    ViewData["Title"] = "Pedidos";
+}
+
+<div class="admin-toolbar">
+    <form method="get" class="search-form">
+        <input type="text" name="busqueda" placeholder="Buscar por número o cliente..." class="form-control" />
+        <select name="estado" class="form-control">
+            <option value="">Todos los estados</option>
+            @foreach (var e in Enum.GetValues<EstadoPedido>())
+            {
+                <option value="@e" selected="@(ViewBag.EstadoFiltro?.ToString() == e.ToString())">@e</option>
+            }
+        </select>
+        <button type="submit" class="btn-primary">Filtrar</button>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>N° Pedido</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted">No hay pedidos</td></tr>
+                }
+                @foreach (var pedido in Model)
+                {
+                    <tr>
+                        <td><strong>#@pedido.NumeroPedido</strong></td>
+                        <td>
+                            @pedido.Usuario?.Nombre @pedido.Usuario?.Apellido
+                            <br /><small>@pedido.Usuario?.Email</small>
+                        </td>
+                        <td><strong>$@pedido.Total.ToString("N2")</strong></td>
+                        <td>
+                            <select class="estado-select" data-id="@pedido.Id"
+                                    onchange="actualizarEstado(@pedido.Id, this.value)">
+                                @foreach (var e in Enum.GetValues<EstadoPedido>())
+                                {
+                                    <option value="@((int)e)" selected="@(pedido.Estado == e)">@e</option>
+                                }
+                            </select>
+                        </td>
+                        <td>@pedido.FechaPedido.ToLocalTime().ToString("dd/MM/yy HH:mm")</td>
+                        <td>
+                            <a asp-area="Admin" asp-controller="Pedidos" asp-action="Detalles"
+                               asp-route-id="@pedido.Id" class="btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function actualizarEstado(id, estado) {
+        fetch('/Admin/Pedidos/ActualizarEstado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, estado: parseInt(estado) })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) mostrarNotificacion('Estado actualizado', 'success');
+        });
+    }
+</script>
+}

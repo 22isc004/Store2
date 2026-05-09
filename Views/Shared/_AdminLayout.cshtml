@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin | Sneackers Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo">SS Admin</span>
+            <button id="sidebarToggle" class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                <i class="fas fa-chart-line"></i><span>Dashboard</span>
+            </a>
+            <a asp-area="Admin" asp-controller="Productos" asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Productos" ? "active" : "")">
+                <i class="fas fa-box"></i><span>Productos</span>
+            </a>
+            <a asp-area="Admin" asp-controller="Categorias" asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Categorias" ? "active" : "")">
+                <i class="fas fa-tags"></i><span>Categorías</span>
+            </a>
+            <a asp-area="Admin" asp-controller="Pedidos" asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Pedidos" ? "active" : "")">
+                <i class="fas fa-shopping-cart"></i><span>Pedidos</span>
+            </a>
+            <a asp-area="Admin" asp-controller="Usuarios" asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">
+                <i class="fas fa-users"></i><span>Usuarios</span>
+            </a>
+            <hr class="sidebar-divider" />
+            <a asp-controller="Home" asp-action="Index" asp-area="">
+                <i class="fas fa-store"></i><span>Ver Tienda</span>
+            </a>
+            <form asp-controller="Cuenta" asp-action="Logout" asp-area="" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="sidebar-logout">
+                    <i class="fas fa-sign-out-alt"></i><span>Salir</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal del admin -->
+    <div class="admin-content">
+        <!-- Topbar -->
+        <header class="admin-topbar">
+            <button id="mobileToggle" class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title">@ViewData["Title"]</div>
+            <div class="topbar-user">
+                <i class="fas fa-user-circle"></i>
+                <span>@User.Identity?.Name</span>
+            </div>
+        </header>
+
+        <!-- Alertas -->
+        @if (TempData["Exito"] != null)
+        {
+            <div class="alert alert-success alert-dismissible mx-4 mt-3">
+                <i class="fas fa-check-circle"></i> @TempData["Exito"]
+                <button class="alert-close">&times;</button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error alert-dismissible mx-4 mt-3">
+                <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                <button class="alert-close">&times;</button>
+            </div>
+        }
+
+        <!-- Página actual -->
+        <main class="admin-main">
+            @RenderBody()
+        </main>
+    </div>
+</div>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/admin.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,205 @@
+@model List<SneackersStore.Models.CarritoItem>
+@{
+    ViewData["Title"] = "Mi Carrito";
+    var total = (decimal)(ViewBag.Total ?? 0);
+    var envio = total >= 1500 ? 0 : 150;
+}
+
+<div class="carrito-page">
+    <div class="container">
+        <h1 class="page-title"><i class="fas fa-shopping-bag"></i> Mi Carrito</h1>
+
+        @if (!Model.Any())
+        {
+            <div class="carrito-vacio">
+                <i class="fas fa-shopping-bag carrito-vacio-icon"></i>
+                <h2>Tu carrito está vacío</h2>
+                <p>Agrega productos desde el catálogo para comenzar tu compra</p>
+                <a asp-controller="Catalogo" asp-action="Index" class="btn-primary btn-lg">
+                    Explorar Productos
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="carrito-layout">
+                <!-- Lista de productos en el carrito -->
+                <div class="carrito-items" id="carritoItems">
+                    @foreach (var item in Model)
+                    {
+                        <div class="carrito-item" id="item-@item.ProductoId-@item.Talla-@item.Color"
+                             data-id="@item.ProductoId"
+                             data-talla="@item.Talla"
+                             data-color="@item.Color">
+
+                            <img src="@(item.Imagen ?? "/img/no-image.jpg")" alt="@item.Nombre" />
+
+                            <div class="item-info">
+                                <h3>@item.Nombre</h3>
+                                @if (!string.IsNullOrEmpty(item.Marca))
+                                {
+                                    <span class="item-marca">@item.Marca</span>
+                                }
+                                <div class="item-variantes">
+                                    @if (!string.IsNullOrEmpty(item.Talla))
+                                    {
+                                        <span>Talla: <strong>@item.Talla</strong></span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Color))
+                                    {
+                                        <span>Color: <strong>@item.Color</strong></span>
+                                    }
+                                </div>
+                                <span class="item-precio">$@item.Precio.ToString("N2")</span>
+                            </div>
+
+                            <div class="item-cantidad">
+                                <button class="btn-cantidad" onclick="cambiarCantidad('@item.ProductoId', '@item.Talla', '@item.Color', -1)">−</button>
+                                <input type="number" class="cantidad-input" value="@item.Cantidad" min="1"
+                                       onchange="setCantidad('@item.ProductoId', '@item.Talla', '@item.Color', this.value)" />
+                                <button class="btn-cantidad" onclick="cambiarCantidad('@item.ProductoId', '@item.Talla', '@item.Color', 1)">+</button>
+                            </div>
+
+                            <div class="item-subtotal" id="subtotal-@item.ProductoId-@item.Talla-@item.Color">
+                                $@item.Subtotal.ToString("N2")
+                            </div>
+
+                            <button class="btn-eliminar" onclick="eliminarItem('@item.ProductoId', '@item.Talla', '@item.Color')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Vaciar carrito -->
+                    <div class="carrito-actions">
+                        <a asp-controller="Catalogo" asp-action="Index" class="btn-outline">
+                            <i class="fas fa-arrow-left"></i> Seguir Comprando
+                        </a>
+                        <button onclick="vaciarCarrito()" class="btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Vaciar Carrito
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumen del pedido -->
+                <div class="carrito-resumen">
+                    <h3>Resumen del Pedido</h3>
+                    <div class="resumen-linea">
+                        <span>Subtotal</span>
+                        <span id="resumenSubtotal">$@total.ToString("N2")</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Envío</span>
+                        <span id="resumenEnvio">
+                            @if (envio == 0) { <span class="envio-gratis">GRATIS</span> }
+                            else { <text>$@envio.ToString("N2")</text> }
+                        </span>
+                    </div>
+                    @if (total < 1500)
+                    {
+                        <div class="envio-progreso">
+                            <p>Te faltan <strong>$@((1500 - total).ToString("N2"))</strong> para envío gratis</p>
+                            <div class="barra-progreso">
+                                <div class="barra-fill" style="width: @((total / 1500 * 100).ToString("F0"))%"></div>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="resumen-total">
+                        <strong>Total</strong>
+                        <strong id="resumenTotal">$@((total + envio).ToString("N2"))</strong>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Pedido" asp-action="Checkout" class="btn-primary btn-block btn-lg">
+                            <i class="fas fa-lock"></i> Proceder al Pago
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Cuenta" asp-action="Login"
+                           asp-route-returnUrl="/Pedido/Checkout"
+                           class="btn-primary btn-block btn-lg">
+                            <i class="fas fa-user"></i> Inicia Sesión para Comprar
+                        </a>
+                        <a asp-controller="Cuenta" asp-action="Registro" class="btn-outline btn-block mt-2">
+                            Crear Cuenta
+                        </a>
+                    }
+
+                    <div class="metodos-pago">
+                        <p><i class="fas fa-lock"></i> Pago seguro y protegido</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function cambiarCantidad(id, talla, color, delta) {
+        const input = document.querySelector(`#item-${id}-${talla}-${color} .cantidad-input`);
+        if (!input) return;
+        const nueva = Math.max(1, parseInt(input.value) + delta);
+        input.value = nueva;
+        actualizarCantidadServer(id, talla, color, nueva);
+    }
+
+    function setCantidad(id, talla, color, valor) {
+        actualizarCantidadServer(id, talla, color, Math.max(1, parseInt(valor)));
+    }
+
+    function actualizarCantidadServer(id, talla, color, cantidad) {
+        fetch('/Carrito/ActualizarCantidad', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ productoId: id, talla: talla, color: color, cantidad: cantidad })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const subtotalEl = document.getElementById(`subtotal-${id}-${talla}-${color}`);
+                if (subtotalEl) subtotalEl.textContent = '$' + data.subtotal.toFixed(2);
+                actualizarTotalesCarrito(data.total, data.totalItems);
+            }
+        });
+    }
+
+    function eliminarItem(id, talla, color) {
+        fetch('/Carrito/Eliminar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ productoId: id, talla: talla, color: color })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById(`item-${id}-${talla}-${color}`);
+                if (row) row.remove();
+                actualizarTotalesCarrito(data.total, data.totalItems);
+                if (data.totalItems === 0) location.reload();
+            }
+        });
+    }
+
+    function vaciarCarrito() {
+        if (!confirm('¿Seguro que quieres vaciar el carrito?')) return;
+        fetch('/Carrito/Vaciar', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(() => location.reload());
+    }
+
+    function actualizarTotalesCarrito(total, totalItems) {
+        const envio = total >= 1500 ? 0 : 150;
+        const subtotalEl = document.getElementById('resumenSubtotal');
+        const totalEl = document.getElementById('resumenTotal');
+        if (subtotalEl) subtotalEl.textContent = '$' + total.toFixed(2);
+        if (totalEl) totalEl.textContent = '$' + (total + envio).toFixed(2);
+        actualizarContadorCarrito(totalItems);
+    }
+</script>
+}

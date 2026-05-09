@@ -1,0 +1,72 @@
+@model SneackersStore.Models.ViewModels.RegistroViewModel
+@{
+    ViewData["Title"] = "Crear Cuenta";
+    Layout = "_Layout";
+}
+
+<div class="auth-page">
+    <div class="auth-card auth-card-wide">
+        <div class="auth-header">
+            <h1>Crear Cuenta</h1>
+            <p>Únete a la comunidad Sneackers Store</p>
+        </div>
+
+        <form asp-action="Registro" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label asp-for="Nombre"><i class="fas fa-user"></i> Nombre</label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Tu nombre" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Apellido">Apellido</label>
+                    <input asp-for="Apellido" class="form-control" placeholder="Tu apellido" />
+                    <span asp-validation-for="Apellido" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email"><i class="fas fa-envelope"></i> Email</label>
+                <input asp-for="Email" class="form-control" type="email" placeholder="tu@email.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Telefono"><i class="fas fa-phone"></i> Teléfono</label>
+                <input asp-for="Telefono" class="form-control" placeholder="+52 55 0000 0000" />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label asp-for="Password"><i class="fas fa-lock"></i> Contraseña</label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="Mínimo 6 caracteres" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ConfirmarPassword">Confirmar Contraseña</label>
+                    <input asp-for="ConfirmarPassword" class="form-control" type="password" placeholder="Repite tu contraseña" />
+                    <span asp-validation-for="ConfirmarPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block btn-lg">
+                <i class="fas fa-user-plus"></i> Crear Mi Cuenta
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>¿Ya tienes cuenta?
+                <a asp-controller="Cuenta" asp-action="Login">Iniciar Sesión</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

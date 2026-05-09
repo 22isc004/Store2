@@ -1,0 +1,18 @@
+@model SneackersStore.Controllers.ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="error-page">
+    <div class="container text-center">
+        <h1><i class="fas fa-exclamation-triangle"></i></h1>
+        <h2>Algo salió mal</h2>
+        <p>Lo sentimos, ocurrió un error inesperado.</p>
+        @if (Model.ShowRequestId)
+        {
+            <small>Request ID: @Model.RequestId</small>
+        }
+        <br /><br />
+        <a asp-controller="Home" asp-action="Index" class="btn-primary">Ir al Inicio</a>
+    </div>
+</div>

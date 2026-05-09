@@ -1,0 +1,137 @@
+@model SneackersStore.Models.ViewModels.ProductoFiltroViewModel
+@{
+    ViewData["Title"] = "Catálogo";
+    var categoriaActual = Model.Categorias.FirstOrDefault(c => c.Id == Model.CategoriaId);
+    if (categoriaActual != null)
+        ViewData["Title"] = categoriaActual.Nombre;
+}
+
+<div class="catalogo-page">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Inicio</a>
+            <span>/</span>
+            <a asp-controller="Catalogo" asp-action="Index">Catálogo</a>
+            @if (categoriaActual != null)
+            {
+                <span>/</span>
+                <span>@categoriaActual.Nombre</span>
+            }
+        </nav>
+
+        <div class="catalogo-layout">
+            <!-- Sidebar de filtros -->
+            <aside class="filtros-sidebar" id="filtrosSidebar">
+                <div class="filtros-header">
+                    <h3><i class="fas fa-sliders-h"></i> Filtros</h3>
+                    <button id="limpiarFiltros" class="btn-link">Limpiar todo</button>
+                </div>
+
+                <form id="filtrosForm">
+                    <!-- Categorías -->
+                    <div class="filtro-grupo">
+                        <h4>Categoría</h4>
+                        <div class="filtro-opciones">
+                            <label class="filtro-radio @(Model.CategoriaId == null ? "active" : "")">
+                                <input type="radio" name="categoriaId" value="" @(Model.CategoriaId == null ? "checked" : "") /> Todas
+                            </label>
+                            @foreach (var cat in Model.Categorias)
+                            {
+                                <label class="filtro-radio @(Model.CategoriaId == cat.Id ? "active" : "")">
+                                    <input type="radio" name="categoriaId" value="@cat.Id"
+                                           @(Model.CategoriaId == cat.Id ? "checked" : "") />
+                                    @cat.Nombre
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Rango de precio -->
+                    <div class="filtro-grupo">
+                        <h4>Precio</h4>
+                        <div class="precio-range">
+                            <input type="number" name="precioMin" placeholder="Mín" value="@Model.PrecioMin" min="0" />
+                            <span>—</span>
+                            <input type="number" name="precioMax" placeholder="Máx" value="@Model.PrecioMax" min="0" />
+                        </div>
+                    </div>
+
+                    <!-- Marcas -->
+                    @if (Model.Marcas.Any())
+                    {
+                        <div class="filtro-grupo">
+                            <h4>Marca</h4>
+                            <div class="filtro-opciones">
+                                @foreach (var marca in Model.Marcas)
+                                {
+                                    <label class="filtro-checkbox">
+                                        <input type="radio" name="marca" value="@marca"
+                                               @(Model.Marca == marca ? "checked" : "") />
+                                        @marca
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Opciones especiales -->
+                    <div class="filtro-grupo">
+                        <h4>Especiales</h4>
+                        <label class="filtro-checkbox">
+                            <input type="checkbox" name="soloOferta" value="true"
+                                   @(Model.SoloOferta ? "checked" : "") />
+                            Solo Ofertas
+                        </label>
+                        <label class="filtro-checkbox">
+                            <input type="checkbox" name="soloDestacados" value="true"
+                                   @(Model.SoloDestacados ? "checked" : "") />
+                            Solo Destacados
+                        </label>
+                    </div>
+
+                    <button type="button" id="aplicarFiltros" class="btn-primary btn-block">
+                        Aplicar Filtros
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Área de productos -->
+            <div class="productos-area">
+                <!-- Barra superior -->
+                <div class="productos-toolbar">
+                    <div class="toolbar-left">
+                        <button id="btnFiltrosMobile" class="btn-filtros-mobile">
+                            <i class="fas fa-sliders-h"></i> Filtros
+                        </button>
+                        @if (!string.IsNullOrEmpty(Model.Busqueda))
+                        {
+                            <span class="busqueda-tag">
+                                "@Model.Busqueda"
+                                <a asp-controller="Catalogo" asp-action="Index">&times;</a>
+                            </span>
+                        }
+                    </div>
+                    <div class="toolbar-right">
+                        <select id="ordenarSelect" name="ordenar">
+                            <option value="" selected="@(string.IsNullOrEmpty(Model.Ordenar))">Relevancia</option>
+                            <option value="nuevos" selected="@(Model.Ordenar == "nuevos")">Más Nuevos</option>
+                            <option value="precio_asc" selected="@(Model.Ordenar == "precio_asc")">Precio: Menor a Mayor</option>
+                            <option value="precio_desc" selected="@(Model.Ordenar == "precio_desc")">Precio: Mayor a Menor</option>
+                            <option value="nombre" selected="@(Model.Ordenar == "nombre")">Nombre A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de productos (reemplazado por AJAX) -->
+                <div id="productosContainer">
+                    @await Html.PartialAsync("_ListaProductos", Model)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/catalogo.js" asp-append-version="true"></script>
+}

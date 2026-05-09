@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Contacto";
+}
+
+<div class="contacto-page">
+    <div class="container">
+        <h1 class="page-title"><i class="fas fa-envelope"></i> Contacto</h1>
+
+        <div class="contacto-layout">
+            <div class="contacto-info">
+                <h3>¿Cómo podemos ayudarte?</h3>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email</strong>
+                        <p>info@sneackersstore.com</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Teléfono</strong>
+                        <p>+52 55 1234 5678</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Horario</strong>
+                        <p>Lunes a Viernes: 9:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contacto-form">
+                <form>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" class="form-control" placeholder="Tu nombre completo" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" placeholder="tu@email.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>Mensaje</label>
+                        <textarea class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.contacto-page { padding: 40px 0 80px; }
+.contacto-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 48px; margin-top: 32px; }
+.contacto-info h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 24px; }
+.info-item { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+.info-item i { font-size: 20px; color: #FF4B2B; margin-top: 2px; }
+.info-item strong { display: block; font-size: 14px; font-weight: 700; }
+.info-item p { font-size: 14px; color: #666; margin: 0; }
+.contacto-form { background: white; padding: 32px; border-radius: 12px; border: 1px solid #e5e5e5; }
+</style>

@@ -1,0 +1,192 @@
+@{
+    ViewData["Title"] = "Sneackers Store - Boutique de Moda";
+    var categorias = ViewBag.Categorias as List<SneackersStore.Models.Categoria> ?? new();
+    var destacados = ViewBag.ProductosDestacados as List<SneackersStore.Models.Producto> ?? new();
+    var nuevos = ViewBag.ProductosNuevos as List<SneackersStore.Models.Producto> ?? new();
+}
+
+<!-- Hero Banner -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <span class="hero-tag">Nueva Colección 2025</span>
+            <h1>Estilo que <br/><em>define</em> tu mundo</h1>
+            <p>Tenis, ropa y accesorios de las mejores marcas. Envío gratis en compras mayores a $1,500.</p>
+            <div class="hero-actions">
+                <a asp-controller="Catalogo" asp-action="Index" class="btn-primary btn-lg">
+                    Explorar Colección
+                </a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-soloOferta="true" class="btn-outline btn-lg">
+                    Ver Ofertas
+                </a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-circle"></div>
+            <div class="hero-img-placeholder">
+                <i class="fas fa-shoe-prints"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorías -->
+<section class="categorias-section">
+    <div class="container">
+        <h2 class="section-title">Explora por Categoría</h2>
+        <div class="categorias-grid">
+            @foreach (var cat in categorias)
+            {
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="@cat.Id"
+                   class="categoria-card">
+                    <div class="categoria-icon">
+                        @switch (cat.Slug)
+                        {
+                            case "tenis-sneakers": <i class="fas fa-shoe-prints"></i> break;
+                            case "ropa": <i class="fas fa-tshirt"></i> break;
+                            case "perfumes": <i class="fas fa-spray-can"></i> break;
+                            case "gorras": <i class="fas fa-hat-cowboy"></i> break;
+                            case "bolsos": <i class="fas fa-shopping-bag"></i> break;
+                            case "lentes": <i class="fas fa-glasses"></i> break;
+                            default: <i class="fas fa-star"></i> break;
+                        }
+                    </div>
+                    <span>@cat.Nombre</span>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+@if (destacados.Any())
+{
+    <section class="productos-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Productos Destacados</h2>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-soloDestacados="true" class="ver-todos">
+                    Ver todos <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="productos-grid">
+                @foreach (var p in destacados)
+                {
+                    <div class="producto-card">
+                        <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id" class="producto-img-link">
+                            <img src="@(p.Imagen ?? "/img/no-image.jpg")" alt="@p.Nombre" loading="lazy" />
+                            @if (p.PorcentajeDescuento > 0)
+                            {
+                                <span class="badge-sale">-@p.PorcentajeDescuento%</span>
+                            }
+                            <div class="producto-overlay">
+                                <button class="btn-add-cart" data-id="@p.Id" data-nombre="@p.Nombre" data-precio="@p.PrecioEfectivo">
+                                    <i class="fas fa-shopping-bag"></i> Agregar
+                                </button>
+                            </div>
+                        </a>
+                        <div class="producto-info">
+                            @if (!string.IsNullOrEmpty(p.Marca))
+                            {
+                                <span class="producto-marca">@p.Marca</span>
+                            }
+                            <h3 class="producto-nombre">
+                                <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id">@p.Nombre</a>
+                            </h3>
+                            <div class="producto-precios">
+                                @if (p.PrecioOferta.HasValue)
+                                {
+                                    <span class="precio-oferta">$@p.PrecioOferta.Value.ToString("N2")</span>
+                                    <span class="precio-original">$@p.Precio.ToString("N2")</span>
+                                }
+                                else
+                                {
+                                    <span class="precio-normal">$@p.Precio.ToString("N2")</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Banner de envío gratis -->
+<section class="banner-envio">
+    <div class="container">
+        <div class="envio-grid">
+            <div class="envio-item">
+                <i class="fas fa-truck"></i>
+                <div>
+                    <strong>Envío Gratis</strong>
+                    <p>En compras mayores a $1,500</p>
+                </div>
+            </div>
+            <div class="envio-item">
+                <i class="fas fa-undo"></i>
+                <div>
+                    <strong>Devoluciones</strong>
+                    <p>30 días para cambios</p>
+                </div>
+            </div>
+            <div class="envio-item">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Compra Segura</strong>
+                    <p>Pagos 100% protegidos</p>
+                </div>
+            </div>
+            <div class="envio-item">
+                <i class="fas fa-headset"></i>
+                <div>
+                    <strong>Soporte 24/7</strong>
+                    <p>Estamos para ayudarte</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nuevos productos -->
+@if (nuevos.Any())
+{
+    <section class="productos-section bg-light">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Recién Llegados</h2>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-ordenar="nuevos" class="ver-todos">
+                    Ver todos <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="productos-grid cols-4">
+                @foreach (var p in nuevos)
+                {
+                    <div class="producto-card">
+                        <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id" class="producto-img-link">
+                            <img src="@(p.Imagen ?? "/img/no-image.jpg")" alt="@p.Nombre" loading="lazy" />
+                            <span class="badge-nuevo">NUEVO</span>
+                            <div class="producto-overlay">
+                                <button class="btn-add-cart" data-id="@p.Id" data-nombre="@p.Nombre" data-precio="@p.PrecioEfectivo">
+                                    <i class="fas fa-shopping-bag"></i> Agregar
+                                </button>
+                            </div>
+                        </a>
+                        <div class="producto-info">
+                            @if (!string.IsNullOrEmpty(p.Marca))
+                            {
+                                <span class="producto-marca">@p.Marca</span>
+                            }
+                            <h3 class="producto-nombre">
+                                <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id">@p.Nombre</a>
+                            </h3>
+                            <div class="producto-precios">
+                                <span class="precio-normal">$@p.Precio.ToString("N2")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}

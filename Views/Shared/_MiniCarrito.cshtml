@@ -1,0 +1,35 @@
+@model List<SneackersStore.Models.CarritoItem>
+
+<div class="mini-carrito-items">
+    @if (!Model.Any())
+    {
+        <div class="mini-carrito-vacio">
+            <i class="fas fa-shopping-bag"></i>
+            <p>Tu carrito está vacío</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model.Take(4))
+        {
+            <div class="mini-item">
+                <img src="@(item.Imagen ?? "/img/no-image.jpg")" alt="@item.Nombre" />
+                <div class="mini-item-info">
+                    <span class="mini-item-nombre">@item.Nombre</span>
+                    @if (!string.IsNullOrEmpty(item.Talla))
+                    {
+                        <small>Talla: @item.Talla</small>
+                    }
+                    <span class="mini-item-precio">@item.Cantidad × $@item.Precio.ToString("N2")</span>
+                </div>
+            </div>
+        }
+
+        <div class="mini-carrito-total">
+            <strong>Total: $@ViewBag.Total?.ToString("N2")</strong>
+        </div>
+        <a asp-controller="Carrito" asp-action="Index" class="btn-ver-carrito">
+            Ver Carrito
+        </a>
+    }
+</div>

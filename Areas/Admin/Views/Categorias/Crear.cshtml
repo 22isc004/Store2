@@ -1,0 +1,61 @@
+@model SneackersStore.Models.Categoria
+@{
+    ViewData["Title"] = "Nueva Categoría";
+}
+
+<div class="admin-form-page">
+    <nav class="admin-breadcrumb">
+        <a asp-area="Admin" asp-controller="Categorias" asp-action="Index">Categorías</a>
+        <span>/</span>
+        <span>Nueva</span>
+    </nav>
+
+    <div class="admin-card">
+        <form asp-action="Crear" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label asp-for="Nombre"></label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Nombre de la categoría" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Slug"></label>
+                    <input asp-for="Slug" class="form-control" placeholder="url-amigable (auto si vacío)" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Descripcion"></label>
+                <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label asp-for="Orden"></label>
+                    <input asp-for="Orden" class="form-control" type="number" min="0" />
+                </div>
+                <div class="form-group pt-4">
+                    <label class="form-check-label">
+                        <input asp-for="Activa" type="checkbox" /> Categoría Activa
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <a asp-area="Admin" asp-controller="Categorias" asp-action="Index" class="btn-outline btn-lg">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

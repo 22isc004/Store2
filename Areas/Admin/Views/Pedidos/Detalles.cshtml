@@ -1,0 +1,108 @@
+@model SneackersStore.Models.Pedido
+@using SneackersStore.Models
+@{
+    ViewData["Title"] = $"Pedido #{Model.NumeroPedido}";
+}
+
+<div class="admin-form-page">
+    <nav class="admin-breadcrumb">
+        <a asp-area="Admin" asp-controller="Pedidos" asp-action="Index">Pedidos</a>
+        <span>/</span>
+        <span>#@Model.NumeroPedido</span>
+    </nav>
+
+    <div class="pedido-admin-layout">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>Productos del Pedido</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Producto</th><th>Talla</th><th>Color</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    @if (item.Producto?.Imagen != null)
+                                    {
+                                        <img src="@item.Producto.Imagen" alt=""
+                                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin-right:8px;" />
+                                    }
+                                    @item.Producto?.Nombre
+                                </td>
+                                <td>@(item.Talla ?? "-")</td>
+                                <td>@(item.Color ?? "-")</td>
+                                <td>@item.Cantidad</td>
+                                <td>$@item.PrecioUnitario.ToString("N2")</td>
+                                <td><strong>$@item.Subtotal.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="pedido-totales">
+                <div class="resumen-linea"><span>Subtotal</span><span>$@Model.Subtotal.ToString("N2")</span></div>
+                <div class="resumen-linea"><span>Envío</span><span>@(Model.CostoEnvio == 0 ? "GRATIS" : "$" + Model.CostoEnvio.ToString("N2"))</span></div>
+                <div class="resumen-total"><strong>Total</strong><strong>$@Model.Total.ToString("N2")</strong></div>
+            </div>
+        </div>
+
+        <div class="pedido-aside">
+            <div class="admin-card">
+                <div class="admin-card-header"><h3>Información del Pedido</h3></div>
+                <div class="admin-card-body">
+                    <p><strong>Número:</strong> #@Model.NumeroPedido</p>
+                    <p><strong>Fecha:</strong> @Model.FechaPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Estado:</strong></p>
+                    <select class="form-control" onchange="actualizarEstado(@Model.Id, this.value)">
+                        @foreach (var e in Enum.GetValues<EstadoPedido>())
+                        {
+                            <option value="@((int)e)" selected="@(Model.Estado == e)">@e</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="admin-card mt-3">
+                <div class="admin-card-header"><h3>Cliente</h3></div>
+                <div class="admin-card-body">
+                    <p><strong>@Model.Usuario?.Nombre @Model.Usuario?.Apellido</strong></p>
+                    <p>@Model.Usuario?.Email</p>
+                    <p>@Model.Telefono</p>
+                </div>
+            </div>
+
+            <div class="admin-card mt-3">
+                <div class="admin-card-header"><h3>Dirección de Envío</h3></div>
+                <div class="admin-card-body">
+                    <p>@Model.DireccionEnvio</p>
+                    <p>@Model.Ciudad, @Model.EstadoProvincia @Model.CodigoPostal</p>
+                    <p>@Model.Pais</p>
+                    @if (!string.IsNullOrEmpty(Model.Notas))
+                    {
+                        <p><em>Nota: @Model.Notas</em></p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function actualizarEstado(id, estado) {
+        fetch('/Admin/Pedidos/ActualizarEstado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, estado: parseInt(estado) })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) mostrarNotificacion('Estado actualizado a: ' + data.nuevoEstado, 'success');
+        });
+    }
+</script>
+}

@@ -1,0 +1,257 @@
+@model SneackersStore.Models.Producto
+@{
+    ViewData["Title"] = Model.Nombre;
+    var relacionados = ViewBag.Relacionados as List<SneackersStore.Models.Producto> ?? new();
+    var tallas = Model.Tallas?.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToList() ?? new();
+    var colores = Model.Colores?.Split(',').Select(c => c.Trim()).Where(c => !string.IsNullOrEmpty(c)).ToList() ?? new();
+}
+
+<div class="detalle-page">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Inicio</a>
+            <span>/</span>
+            <a asp-controller="Catalogo" asp-action="Index">Catálogo</a>
+            @if (Model.Categoria != null)
+            {
+                <span>/</span>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="@Model.CategoriaId">
+                    @Model.Categoria.Nombre
+                </a>
+            }
+            <span>/</span>
+            <span>@Model.Nombre</span>
+        </nav>
+
+        <div class="detalle-layout">
+            <!-- Galería de imágenes -->
+            <div class="detalle-galeria">
+                <div class="galeria-principal">
+                    <img id="imagenPrincipal" src="@(Model.Imagen ?? "/img/no-image.jpg")" alt="@Model.Nombre" />
+                    @if (Model.PorcentajeDescuento > 0)
+                    {
+                        <span class="badge-sale badge-lg">-@Model.PorcentajeDescuento%</span>
+                    }
+                    @if (Model.EsNuevo)
+                    {
+                        <span class="badge-nuevo badge-lg">NUEVO</span>
+                    }
+                </div>
+                <!-- Miniaturas de imágenes adicionales -->
+                @if (!string.IsNullOrEmpty(Model.ImagenesAdicionales))
+                {
+                    <div class="galeria-miniaturas">
+                        <img src="@(Model.Imagen ?? "/img/no-image.jpg")" class="miniatura active"
+                             onclick="cambiarImagen(this.src)" alt="@Model.Nombre" />
+                        @foreach (var img in Model.ImagenesAdicionales.Split('|').Where(i => !string.IsNullOrEmpty(i)))
+                        {
+                            <img src="@img" class="miniatura" onclick="cambiarImagen(this.src)" alt="@Model.Nombre" />
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Información del producto -->
+            <div class="detalle-info">
+                @if (!string.IsNullOrEmpty(Model.Marca))
+                {
+                    <span class="detalle-marca">@Model.Marca</span>
+                }
+                <h1 class="detalle-nombre">@Model.Nombre</h1>
+
+                @if (!string.IsNullOrEmpty(Model.Modelo))
+                {
+                    <p class="detalle-modelo">Modelo: @Model.Modelo</p>
+                }
+
+                <!-- Precio -->
+                <div class="detalle-precios">
+                    @if (Model.PrecioOferta.HasValue)
+                    {
+                        <span class="precio-oferta-lg">$@Model.PrecioOferta.Value.ToString("N2")</span>
+                        <span class="precio-original-lg">$@Model.Precio.ToString("N2")</span>
+                        <span class="ahorro">Ahorras $@((Model.Precio - Model.PrecioOferta.Value).ToString("N2"))</span>
+                    }
+                    else
+                    {
+                        <span class="precio-lg">$@Model.Precio.ToString("N2")</span>
+                    }
+                </div>
+
+                <!-- Disponibilidad -->
+                <div class="detalle-stock">
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="stock-disponible"><i class="fas fa-check-circle"></i> En stock (@Model.Stock disponibles)</span>
+                    }
+                    else
+                    {
+                        <span class="stock-agotado"><i class="fas fa-times-circle"></i> Agotado</span>
+                    }
+                </div>
+
+                <!-- Selector de talla -->
+                @if (tallas.Any())
+                {
+                    <div class="detalle-tallas">
+                        <h4>Talla: <span id="tallaSeleccionada">Selecciona una talla</span></h4>
+                        <div class="tallas-grid">
+                            @foreach (var talla in tallas)
+                            {
+                                <button type="button" class="btn-talla" data-talla="@talla">@talla</button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Selector de color -->
+                @if (colores.Any())
+                {
+                    <div class="detalle-colores">
+                        <h4>Color: <span id="colorSeleccionado">Selecciona un color</span></h4>
+                        <div class="colores-grid">
+                            @foreach (var color in colores)
+                            {
+                                <button type="button" class="btn-color" data-color="@color">@color</button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Cantidad y botón de compra -->
+                @if (Model.Stock > 0)
+                {
+                    <div class="detalle-compra">
+                        <div class="cantidad-selector">
+                            <button type="button" id="btnMenos" class="btn-cantidad">−</button>
+                            <input type="number" id="cantidad" value="1" min="1" max="@Model.Stock" />
+                            <button type="button" id="btnMas" class="btn-cantidad">+</button>
+                        </div>
+                        <button type="button" id="btnAgregarCarrito" class="btn-primary btn-lg btn-add-large"
+                                data-id="@Model.Id"
+                                data-nombre="@Model.Nombre"
+                                data-precio="@Model.PrecioEfectivo">
+                            <i class="fas fa-shopping-bag"></i> Agregar al Carrito
+                        </button>
+                    </div>
+
+                    <a asp-controller="Pedido" asp-action="Checkout" class="btn-outline btn-lg btn-block mt-2">
+                        <i class="fas fa-bolt"></i> Comprar Ahora
+                    </a>
+                }
+
+                <!-- Descripción -->
+                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                {
+                    <div class="detalle-descripcion">
+                        <h4>Descripción</h4>
+                        <p>@Model.Descripcion</p>
+                    </div>
+                }
+
+                <!-- Envío -->
+                <div class="detalle-envio">
+                    <p><i class="fas fa-truck"></i> Envío gratis en compras mayores a $1,500</p>
+                    <p><i class="fas fa-undo"></i> Devolución gratis en 30 días</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos relacionados -->
+        @if (relacionados.Any())
+        {
+            <section class="relacionados-section">
+                <h2 class="section-title">También te puede interesar</h2>
+                <div class="productos-grid">
+                    @foreach (var p in relacionados)
+                    {
+                        <div class="producto-card">
+                            <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id" class="producto-img-link">
+                                <img src="@(p.Imagen ?? "/img/no-image.jpg")" alt="@p.Nombre" loading="lazy" />
+                                <div class="producto-overlay">
+                                    <button class="btn-add-cart" data-id="@p.Id" data-nombre="@p.Nombre" data-precio="@p.PrecioEfectivo">
+                                        <i class="fas fa-shopping-bag"></i> Agregar
+                                    </button>
+                                </div>
+                            </a>
+                            <div class="producto-info">
+                                <h3 class="producto-nombre">
+                                    <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@p.Id">@p.Nombre</a>
+                                </h3>
+                                <span class="precio-normal">$@p.PrecioEfectivo.ToString("N2")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Cambiar imagen principal al hacer clic en miniatura
+    function cambiarImagen(src) {
+        document.getElementById('imagenPrincipal').src = src;
+        document.querySelectorAll('.miniatura').forEach(m => m.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // Selección de talla
+    document.querySelectorAll('.btn-talla').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.btn-talla').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('tallaSeleccionada').textContent = this.dataset.talla;
+        });
+    });
+
+    // Selección de color
+    document.querySelectorAll('.btn-color').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.btn-color').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('colorSeleccionado').textContent = this.dataset.color;
+        });
+    });
+
+    // Control de cantidad
+    document.getElementById('btnMenos')?.addEventListener('click', () => {
+        const input = document.getElementById('cantidad');
+        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+    });
+    document.getElementById('btnMas')?.addEventListener('click', () => {
+        const input = document.getElementById('cantidad');
+        const max = parseInt(input.max);
+        if (parseInt(input.value) < max) input.value = parseInt(input.value) + 1;
+    });
+
+    // Agregar al carrito desde la página de detalle
+    document.getElementById('btnAgregarCarrito')?.addEventListener('click', function () {
+        const talla = document.querySelector('.btn-talla.active')?.dataset.talla;
+        const color = document.querySelector('.btn-color.active')?.dataset.color;
+        const cantidad = parseInt(document.getElementById('cantidad')?.value) || 1;
+
+        fetch('/Carrito/Agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({
+                productoId: this.dataset.id,
+                cantidad: cantidad,
+                talla: talla,
+                color: color
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                mostrarNotificacion(data.message, 'success');
+                actualizarContadorCarrito(data.totalItems);
+            } else {
+                mostrarNotificacion(data.message, 'error');
+            }
+        });
+    });
+</script>
+}

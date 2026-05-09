@@ -1,0 +1,85 @@
+@model List<SneackersStore.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="admin-toolbar">
+    <form method="get" class="search-form">
+        <input type="text" name="busqueda" placeholder="Buscar por nombre o email..." class="form-control" />
+        <button type="submit" class="btn-primary">Buscar</button>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Fecha Registro</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td><strong>@user.Nombre @user.Apellido</strong></td>
+                        <td>@user.Email</td>
+                        <td>@(user.PhoneNumber ?? "-")</td>
+                        <td>@user.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <button class="toggle-usuario btn-sm @(user.Activo ? "btn-success" : "btn-secondary")"
+                                    data-id="@user.Id">
+                                @(user.Activo ? "Activo" : "Inactivo")
+                            </button>
+                        </td>
+                        <td>
+                            <select class="form-control form-control-sm rol-select" data-id="@user.Id"
+                                    onchange="cambiarRol('@user.Id', this.value)">
+                                <option value="Cliente">Cliente</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('.toggle-usuario').forEach(btn => {
+        btn.addEventListener('click', function () {
+            fetch('/Admin/Usuarios/ToggleActivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.dataset.id)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.textContent = data.activo ? 'Activo' : 'Inactivo';
+                    this.className = `toggle-usuario btn-sm ${data.activo ? 'btn-success' : 'btn-secondary'}`;
+                }
+            });
+        });
+    });
+
+    function cambiarRol(id, rol) {
+        fetch('/Admin/Usuarios/CambiarRol', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, rol: rol })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) mostrarNotificacion('Rol actualizado', 'success');
+        });
+    }
+</script>
+}

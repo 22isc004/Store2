@@ -1,0 +1,77 @@
+@model List<SneackersStore.Models.Categoria>
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<div class="admin-toolbar">
+    <span>@Model.Count categoría(s) registrada(s)</span>
+    <a asp-area="Admin" asp-controller="Categorias" asp-action="Crear" class="btn-primary">
+        <i class="fas fa-plus"></i> Nueva Categoría
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Orden</th>
+                    <th>Nombre</th>
+                    <th>Slug</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cat in Model)
+                {
+                    <tr>
+                        <td>@cat.Orden</td>
+                        <td><strong>@cat.Nombre</strong></td>
+                        <td><code>@cat.Slug</code></td>
+                        <td>@(cat.Descripcion?.Length > 50 ? cat.Descripcion[..50] + "..." : cat.Descripcion)</td>
+                        <td>
+                            <span class="@(cat.Activa ? "text-success" : "text-danger")">
+                                @(cat.Activa ? "Activa" : "Inactiva")
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <a asp-area="Admin" asp-controller="Categorias" asp-action="Editar"
+                               asp-route-id="@cat.Id" class="btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn-sm btn-danger btn-eliminar-cat" data-id="@cat.Id">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('.btn-eliminar-cat').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (!confirm('¿Eliminar esta categoría?')) return;
+            fetch('/Admin/Categorias/Eliminar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(parseInt(this.dataset.id))
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest('tr').remove();
+                    mostrarNotificacion('Categoría eliminada', 'success');
+                } else {
+                    mostrarNotificacion(data.message || 'No se pudo eliminar', 'error');
+                }
+            });
+        });
+    });
+</script>
+}

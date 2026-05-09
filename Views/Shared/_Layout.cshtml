@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sneackers Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<!-- Header principal -->
+<header class="header">
+    <nav class="nav-main">
+        <div class="container">
+            <div class="nav-top">
+                <!-- Logo -->
+                <a class="logo" asp-controller="Home" asp-action="Index">
+                    <span class="logo-sneackers">SNEACKERS</span>
+                    <span class="logo-store">STORE</span>
+                </a>
+
+                <!-- Barra de búsqueda -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Buscar productos, marcas..." autocomplete="off" />
+                        <button type="button" id="searchBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div id="searchResultsDropdown" class="search-dropdown"></div>
+                </div>
+
+                <!-- Acciones del usuario -->
+                <div class="nav-actions">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="dropdown">
+                            <button class="btn-icon dropdown-toggle">
+                                <i class="fas fa-user"></i>
+                                <span>@User.Identity.Name?.Split('@')[0]</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a asp-controller="Cuenta" asp-action="Perfil"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+                                <a asp-controller="Pedido" asp-action="MisPedidos"><i class="fas fa-box"></i> Mis Pedidos</a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="fas fa-cog"></i> Panel Admin
+                                    </a>
+                                }
+                                <hr />
+                                <form asp-controller="Cuenta" asp-action="Logout" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Cuenta" asp-action="Login" class="btn-icon">
+                            <i class="fas fa-user"></i><span>Entrar</span>
+                        </a>
+                    }
+
+                    <!-- Carrito -->
+                    <a asp-controller="Carrito" asp-action="Index" class="btn-icon carrito-btn">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="carrito-badge" id="cartCount">0</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Menú de categorías -->
+            <div class="nav-categories">
+                <a asp-controller="Catalogo" asp-action="Index">Todo</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="1">Tenis</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="2">Ropa</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="3">Perfumes</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="4">Gorras</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="5">Bolsos</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="6">Lentes</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-categoriaId="7">Accesorios</a>
+                <a asp-controller="Catalogo" asp-action="Index" asp-route-soloOferta="true" class="nav-sale">SALE</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Alertas de TempData -->
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success alert-dismissible">
+        <i class="fas fa-check-circle"></i> @TempData["Exito"]
+        <button type="button" class="alert-close">&times;</button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-error alert-dismissible">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="alert-close">&times;</button>
+    </div>
+}
+
+<!-- Contenido principal -->
+<main>
+    @RenderBody()
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-logo">SNEACKERS STORE</div>
+                <p>Boutique de moda y lifestyle. Los mejores tenis, ropa y accesorios.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Tienda</h4>
+                <ul>
+                    <li><a asp-controller="Catalogo" asp-action="Index">Catálogo</a></li>
+                    <li><a asp-controller="Catalogo" asp-action="Index" asp-route-soloOferta="true">Ofertas</a></li>
+                    <li><a asp-controller="Catalogo" asp-action="Index" asp-route-soloDestacados="true">Destacados</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Mi Cuenta</h4>
+                <ul>
+                    <li><a asp-controller="Cuenta" asp-action="Login">Iniciar Sesión</a></li>
+                    <li><a asp-controller="Cuenta" asp-action="Registro">Registrarse</a></li>
+                    <li><a asp-controller="Pedido" asp-action="MisPedidos">Mis Pedidos</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@sneackersstore.com</li>
+                    <li><i class="fas fa-phone"></i> +52 55 1234 5678</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Ciudad de México</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; @DateTime.Now.Year Sneackers Store. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/carrito.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Nosotros";
+}
+
+<div class="nosotros-page">
+    <div class="container">
+        <div class="nosotros-hero">
+            <h1>Sobre Sneackers Store</h1>
+            <p>Somos una boutique de moda y lifestyle enfocada en traerte lo mejor en tenis, ropa y accesorios.</p>
+        </div>
+
+        <div class="nosotros-grid">
+            <div class="nosotros-card">
+                <i class="fas fa-star"></i>
+                <h3>Nuestra Misión</h3>
+                <p>Ofrecer productos auténticos de las mejores marcas con la mejor experiencia de compra online.</p>
+            </div>
+            <div class="nosotros-card">
+                <i class="fas fa-heart"></i>
+                <h3>Nuestra Pasión</h3>
+                <p>Amamos la moda urbana y el lifestyle. Cada producto es seleccionado con cuidado para ti.</p>
+            </div>
+            <div class="nosotros-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Garantía</h3>
+                <p>100% productos auténticos. Si no estás satisfecho, te devolvemos tu dinero en 30 días.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nosotros-page { padding: 60px 0; }
+.nosotros-hero { text-align: center; margin-bottom: 48px; }
+.nosotros-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 12px; }
+.nosotros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.nosotros-card { text-align: center; padding: 40px 24px; background: white; border-radius: 12px; border: 1px solid #e5e5e5; }
+.nosotros-card i { font-size: 3rem; color: #FF4B2B; margin-bottom: 20px; }
+.nosotros-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+</style>

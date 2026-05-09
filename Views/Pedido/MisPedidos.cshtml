@@ -1,0 +1,48 @@
+@model List<SneackersStore.Models.Pedido>
+@{
+    ViewData["Title"] = "Mis Pedidos";
+}
+
+<div class="pedidos-page">
+    <div class="container">
+        <h1 class="page-title"><i class="fas fa-box"></i> Mis Pedidos</h1>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>No tienes pedidos aún</h3>
+                <a asp-controller="Catalogo" asp-action="Index" class="btn-primary">Explorar Productos</a>
+            </div>
+        }
+        else
+        {
+            <div class="pedidos-lista">
+                @foreach (var pedido in Model)
+                {
+                    <div class="pedido-card">
+                        <div class="pedido-card-header">
+                            <div>
+                                <strong>#@pedido.NumeroPedido</strong>
+                                <span class="pedido-fecha">@pedido.FechaPedido.ToLocalTime().ToString("dd MMM yyyy")</span>
+                            </div>
+                            <span class="estado-badge estado-@pedido.Estado.ToString().ToLower()">
+                                @pedido.Estado
+                            </span>
+                        </div>
+                        <div class="pedido-card-body">
+                            <span>@pedido.Items.Count producto(s)</span>
+                            <strong class="pedido-total">$@pedido.Total.ToString("N2")</strong>
+                        </div>
+                        <div class="pedido-card-footer">
+                            <a asp-controller="Pedido" asp-action="Detalle" asp-route-id="@pedido.Id"
+                               class="btn-outline btn-sm">
+                                Ver Detalle
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

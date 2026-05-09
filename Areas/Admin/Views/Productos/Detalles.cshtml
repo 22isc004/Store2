@@ -1,0 +1,63 @@
+@model SneackersStore.Models.Producto
+@{
+    ViewData["Title"] = Model.Nombre;
+}
+
+<div class="admin-form-page">
+    <nav class="admin-breadcrumb">
+        <a asp-area="Admin" asp-controller="Productos" asp-action="Index">Productos</a>
+        <span>/</span>
+        <span>@Model.Nombre</span>
+    </nav>
+
+    <div class="admin-card">
+        <div class="detalles-layout">
+            <div class="detalles-imagen">
+                <img src="@(Model.Imagen ?? "/img/no-image.jpg")" alt="@Model.Nombre"
+                     style="width:100%;border-radius:8px;" />
+            </div>
+            <div class="detalles-info">
+                <h2>@Model.Nombre</h2>
+                @if (!string.IsNullOrEmpty(Model.Marca))
+                {
+                    <p><strong>Marca:</strong> @Model.Marca</p>
+                }
+                <p><strong>Categoría:</strong> @Model.Categoria?.Nombre</p>
+                <p><strong>Precio:</strong> $@Model.Precio.ToString("N2")</p>
+                @if (Model.PrecioOferta.HasValue)
+                {
+                    <p><strong>Precio Oferta:</strong> $@Model.PrecioOferta.Value.ToString("N2")</p>
+                }
+                <p><strong>Stock:</strong>
+                    <span class="@(Model.Stock == 0 ? "text-danger" : "text-success")">@Model.Stock</span>
+                </p>
+                <p><strong>Tallas:</strong> @(Model.Tallas ?? "No especificadas")</p>
+                <p><strong>Colores:</strong> @(Model.Colores ?? "No especificados")</p>
+                <p>
+                    <strong>Estado:</strong>
+                    <span class="@(Model.Activo ? "text-success" : "text-danger")">
+                        @(Model.Activo ? "Activo" : "Inactivo")
+                    </span>
+                </p>
+                <p><strong>Destacado:</strong> @(Model.Destacado ? "Sí" : "No")</p>
+                <p><strong>Creado:</strong> @Model.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy")</p>
+
+                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                {
+                    <hr />
+                    <p>@Model.Descripcion</p>
+                }
+
+                <div class="form-actions mt-3">
+                    <a asp-area="Admin" asp-controller="Productos" asp-action="Editar"
+                       asp-route-id="@Model.Id" class="btn-primary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a asp-area="Admin" asp-controller="Productos" asp-action="Index" class="btn-outline">
+                        Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
